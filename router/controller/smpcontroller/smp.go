@@ -3,6 +3,7 @@ package smpcontroller
 import (
 	"EnoseBackend/dao"
 	"EnoseBackend/model"
+	"bufio"
 	"encoding/csv"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -40,6 +41,7 @@ func ListSmp(c *gin.Context) {
 func SelectSmp(c *gin.Context) {
 	req := new(SelectSmpRequestBody)
 	c.BindJSON(&req)
+	var path string
 	if len(req.Name) != 0 {
 		res, _ := model.GetSmpByName(req.Name)
 		c.JSON(200, gin.H{"massage": res})
@@ -54,6 +56,36 @@ func SelectSmp(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"massage": "字段为空"})
+	length := len(path)
+
+	filetype := path[length-3 : length]
+	f, err := os.Open(path)
+	if err != nil {
+		fmt.Println("err:", err)
+		return
+	}
+	defer f.Close()
+	if filetype == "txt" {
+		content, err := readTxt(f)
+		if err != nil {
+			fmt.Println("err:", err)
+			return
+		}
+		fmt.Println("content:", content)
+		c.JSON(200, gin.H{"massage": content})
+	} else if filetype == "csv" {
+		reader := csv.NewReader(f)
+		for {
+			content, err := reader.Read()
+			if err == io.EOF {
+				break
+			} else if err != nil {
+				fmt.Println("Error:", err)
+			}
+			c.JSON(200, gin.H{"line": content})
+		}
+	}
+
 	return
 }
 func Savetxt(c *gin.Context) {
@@ -62,7 +94,7 @@ func Savetxt(c *gin.Context) {
 	var js J
 	label := req.Label
 	name := req.Name
-	folder := req.Folder
+
 	address := req.Address
 	var smp model.Smp
 
@@ -98,7 +130,6 @@ func Savetxt(c *gin.Context) {
 	smp.Label = label
 	smp.Address = address
 	smp.Name = name
-	smp.Folder = folder
 	dao.DB.Create(&smp)
 }
 func Savecsv(c *gin.Context) {
@@ -107,7 +138,7 @@ func Savecsv(c *gin.Context) {
 	var js J
 	label := req.Label
 	name := req.Name
-	folder := req.Folder
+
 	address := req.Address
 
 	var smp model.Smp
@@ -145,6 +176,24 @@ func Savecsv(c *gin.Context) {
 	smp.Label = label
 	smp.Address = address
 	smp.Name = name
-	smp.Folder = folder
-	dao.DB.Create(&smp)
+	dao.DB.Create(smp)
+}
+func readTxt(r io.Reader) ([]string, error) {
+	reader := bufio.NewReader(r)
+	l := make([]string, 0, 64)
+	// 按行读取
+	for {
+		line, _, err := reader.ReadLine()
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				return nil, err
+			}
+		}
+
+		l = append(l, strings.Trim(string(line), " "))
+	}
+
+	return l, nil
 }

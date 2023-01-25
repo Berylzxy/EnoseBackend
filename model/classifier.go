@@ -2,11 +2,12 @@ package model
 
 import (
 	"EnoseBackend/dao"
-	  _"github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Classifier struct {
 	ID              uint ` gorm:"primary_key"`
+	Enose_Name      string
 	Classifier_Name string
 }
 
@@ -31,5 +32,13 @@ func GetClassifier(id uint) (classifier *Classifier, err error) {
 
 func DeleteClassifier(classifier *Classifier) {
 	dao.DB.Delete(&classifier)
+	return
+}
+func ListClassifier() (classifier *[]Classifier, err error) {
+	classifier = new([]Classifier)
+	err = dao.DB.Find(&classifier).Error
+	if err != nil {
+		return nil, err
+	}
 	return
 }

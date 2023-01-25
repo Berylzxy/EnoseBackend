@@ -63,10 +63,10 @@ func Callpython(c *gin.Context) { //data是文件夹的名 文件夹下有很多
 	if req.Algorithm == "训练" {
 		learningmodel, err := model.GetLearningmodelByName(req.Kind)
 		if err != nil {
-			fmt.Println("111")
+			learningmodel := new(model.Learningmodel)
+			learningmodel.Address = req.Save
 			model.AddLearningmodel(learningmodel)
 		} else {
-			fmt.Println("222")
 			learningmodel.Address = req.Save
 			model.UpdateLearningmodel(learningmodel)
 		}

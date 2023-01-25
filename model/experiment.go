@@ -7,9 +7,14 @@ import (
 
 type Experiment struct {
 	ID         int `json:"id" gorm:"primary_key"`
-	name       string
+	Name       string
+	Enose_Name string
+	Sensor     string    `gorm:"type:text"`
 	Start_time time.Time `json:"start_time"`
+	End_time   time.Time `json:"end_time"`
 	State      string    `json:"state"`
+	Pump       string
+	Hertz      string
 }
 
 func AddExperiment(experiment *Experiment) (err error) {
@@ -41,5 +46,13 @@ func GetExperimentByName(name string) (experiment *Experiment, err error) {
 
 func DeleteExperiment(experiment *Experiment) {
 	dao.DB.Delete(&experiment)
+	return
+}
+func ListExperiment() (experiment *[]Experiment, err error) {
+	experiment = new([]Experiment)
+	err = dao.DB.Find(&experiment).Error
+	if err != nil {
+		return nil, err
+	}
 	return
 }

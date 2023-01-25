@@ -15,7 +15,7 @@ func main() {
 		return
 	}
 
-	err = dao.DB.AutoMigrate(&model.User{}, &model.Sensor{}, &model.Learningmodel{}, &model.Smp{},
+	err = dao.DB.AutoMigrate(&model.User{}, &model.Sensor{}, &model.Learningmodel{}, model.Smp{},
 		&model.Pythonfile{}, &model.Enose{}, &model.Classifier{}, &model.Exp_step{}, &model.Experiment{})
 	if err != nil {
 		panic("failed to migrate database")

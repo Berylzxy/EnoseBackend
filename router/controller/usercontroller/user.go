@@ -58,19 +58,22 @@ func UserSignUp(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"code": 1, "error": err.Error()})
 		return
 	}
-
-	user := new(model.User)
-	user.Name = req.Username
-	user.Password = utils.PasswordEncrypt(req.Password)
-	fmt.Println(req)
-	err = model.AddUser(user)
-
+	_, err = model.GetUserByName(req.Username)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"code": 1, "error": err.Error()})
+		user := new(model.User)
+		user.Name = req.Username
+		user.Password = utils.PasswordEncrypt(req.Password)
+		fmt.Println(req)
+		err = model.AddUser(user)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"code": 1, "error": err.Error()})
+			return
+		}
+	} else {
+		c.JSON(http.StatusOK, gin.H{"code": 1, "success": false, "message": "用户名已存在"})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"code": 0, "success": true})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "success": true, "message": "注册成功"})
 
 }
 
@@ -86,12 +89,13 @@ func UserSignIn(c *gin.Context) {
 	user, err := model.GetUserByName(req.Username)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 1, "error": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"code": 1, "error": err.Error()})
 		return
 	}
 
 	if !utils.PasswordVerify(req.Password, user.Password) {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 1, "error": "用户名或密码错误"})
+		fmt.Println("??????????")
+		c.JSON(http.StatusOK, gin.H{"code": 1, "error": "用户名或密码错误"})
 		return
 	}
 
@@ -145,16 +149,19 @@ func UserInfo(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": resp})
 }
-func UserForget(c *gin.Context) {
-	req := new(UserForgetRequestBody)
-	err := c.BindJSON(&req)
-	////usercontroller :=new(model.User)
-	//usercontroller:=new(model.User)
-	//fmt.Print(req.Username)
-	user, err := model.GetUserByName(req.Username)
-	password := user.Password
-	if err != nil {
-		c.JSON(200, gin.H{"message": password})
-	}
-	return
-}
+
+//func UserForget(c *gin.Context) {
+//	req := new(UserForgetRequestBody)
+//	err := c.BindJSON(&req)
+//	////usercontroller :=new(model.User)
+//	//usercontroller:=new(model.User)
+//	//fmt.Print(req.Username)
+//	user, err := model.GetUserByName(req.Username)
+//	//password := user.Password
+//	if err != nil {
+//		c.JSON(200, gin.H{"message": "用户名不存在"})
+//	} else {
+//		c.JSON(200, gin.H{"message": "请联系管理员"})
+//	}
+//	return
+//}

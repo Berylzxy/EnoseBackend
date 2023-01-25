@@ -15,6 +15,14 @@ type Exp_step struct {
 	End_Time       time.Time `json:"end_time"`
 }
 
+func ListExp_step() (expstep *[]Exp_step, err error) {
+	expstep = new([]Exp_step)
+	err = dao.DB.Find(&expstep).Error
+	if err != nil {
+		return nil, err
+	}
+	return
+}
 func AddExp_step(expstep *Exp_step) (err error) {
 	err = dao.DB.Create(expstep).Error
 	return

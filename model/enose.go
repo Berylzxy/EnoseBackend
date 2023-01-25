@@ -6,11 +6,21 @@ import (
 
 type Enose struct {
 	ID         int    `json:"id" gorm:"primary_key"`
-	name       string `json:"name"`
+	Name       string `json:"name"`
+	IP         string
+	State      string
 	Remark     string `json:"remark"`
 	Serial_num int    `json:"serial_num"`
 }
 
+func ListEnose() (enose *[]Enose, err error) {
+	enose = new([]Enose)
+	err = dao.DB.Find(&enose).Error
+	if err != nil {
+		return nil, err
+	}
+	return
+}
 func AddEnose(enose *Enose) (err error) {
 	err = dao.DB.Create(enose).Error
 	return
