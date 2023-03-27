@@ -34,9 +34,9 @@ func GetSensorBySensorName(name string) (sensor *Sensor, err error) {
 	}
 	return
 }
-func GetSensorByEnoseName(name string) (sensor *Sensor, err error) {
-	sensor = new(Sensor)
-	err = dao.DB.Debug().Where("enose_name=?", name).First(sensor).Error
+func GetSensorByEnoseName(name string) (sensor *[]Sensor, err error) {
+	sensor = new([]Sensor)
+	err = dao.DB.Debug().Where("enose_name=?", name).Find(sensor).Error
 	if err != nil {
 		return nil, err
 	}

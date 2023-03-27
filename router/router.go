@@ -5,6 +5,7 @@ import (
 	"EnoseBackend/router/controller/experimentcontroller"
 	"EnoseBackend/router/controller/smpcontroller"
 	"EnoseBackend/router/controller/usercontroller"
+	"EnoseBackend/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,10 +33,15 @@ func Init(r *gin.Engine) {
 	}
 	expGroup := r.Group("/exp")
 	{
-		expGroup.GET("/list", experimentcontroller.ExpList)
+		expGroup.GET("/list", experimentcontroller.ListExp)
+		expGroup.POST("/expdel", experimentcontroller.ExpDel)
 		expGroup.POST("/start", experimentcontroller.StartExp)
-		expGroup.GET("/call", experimentcontroller.Callpython)
+		expGroup.POST("/call", experimentcontroller.Callpython)
 		expGroup.POST("/datacollect", experimentcontroller.DataCollect)
+		expGroup.POST("/setexp", experimentcontroller.SetExp)
+		expGroup.GET("/saveCsv", utils.SaveCsv)
+		expGroup.POST("/xlsxToJson", utils.XlsxToJson)
+		expGroup.POST("/FS", experimentcontroller.FS)
 	}
 	return
 }

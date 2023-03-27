@@ -29,7 +29,14 @@ func GetClassifier(id uint) (classifier *Classifier, err error) {
 	}
 	return
 }
-
+func GetClassifierByEnoseName(name string) (classifier *[]Classifier, err error) {
+	classifier = new([]Classifier)
+	err = dao.DB.Debug().Where("enose_name=?", name).Find(classifier).Error
+	if err != nil {
+		return nil, err
+	}
+	return
+}
 func DeleteClassifier(classifier *Classifier) {
 	dao.DB.Delete(&classifier)
 	return

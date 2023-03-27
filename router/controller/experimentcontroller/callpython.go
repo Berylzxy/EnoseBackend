@@ -21,11 +21,14 @@ const (
 var Res []byte
 
 type CallPythonRequest struct {
-	ExpName   string
-	Algorithm string
-	Kind      string
-	Dataname  string
-	Save      string
+	ExpName    string
+	DeviceName string
+	Algorithm  string
+	Kind       string
+	Dataname   string
+	Ressave    string
+	Selected   []int
+	Save       string
 }
 
 func ConvertByte2String(byte []byte, charset Charset) string {
@@ -51,19 +54,27 @@ func Callpython(c *gin.Context) { //data是文件夹的名 文件夹下有很多
 	data := new(model.Smp)
 	data, _ = model.GetSmpByName(req.Dataname)
 	python, _ = model.GetPythonfileByName(req.Algorithm)
-
-	cmd := exec.Command("python", python.Address, req.Kind, data.Address)
+	cmd := exec.Command("python", python.Address, req.Kind, data.Address, req.Ressave)
+	if req.Kind == "" {
+		c.JSON(200, gin.H{"message": "请选择函数"})
+	}
+	if req.Dataname == "" {
+		c.JSON(200, gin.H{"message": "请选择文件"})
+	}
 	if req.Algorithm == "预测" {
 		//fmt.Println("进来了")
 		learningmodel := new(model.Learningmodel)
-		learningmodel, _ = model.GetLearningmodelByName(req.Kind)
+		learningmodel, _ = model.GetLearningmodelByName(req.Kind, req.DeviceName, req.ExpName)
 		//fmt.Println(learningmodel.Address)
-		cmd = exec.Command("python", python.Address, learningmodel.Address, data.Address)
+		cmd = exec.Command("python", python.Address, learningmodel.Address, data.Address, req.Ressave)
 	}
 	if req.Algorithm == "训练" {
-		learningmodel, err := model.GetLearningmodelByName(req.Kind)
+		learningmodel, err := model.GetLearningmodelByName(req.Kind, req.DeviceName, req.ExpName)
 		if err != nil {
 			learningmodel := new(model.Learningmodel)
+			learningmodel.Name = req.Kind
+			learningmodel.Enose_name = req.DeviceName
+			learningmodel.Experiment_name = req.ExpName
 			learningmodel.Address = req.Save
 			model.AddLearningmodel(learningmodel)
 		} else {
@@ -71,7 +82,7 @@ func Callpython(c *gin.Context) { //data是文件夹的名 文件夹下有很多
 			model.UpdateLearningmodel(learningmodel)
 		}
 
-		cmd = exec.Command("python", python.Address, req.Kind, data.Address, req.Save)
+		cmd = exec.Command("python", python.Address, req.Kind, data.Address, req.Ressave, req.Save)
 
 	}
 
@@ -116,5 +127,17 @@ func Callpython(c *gin.Context) { //data是文件夹的名 文件夹下有很多
 	expstep.Name = req.ExpName
 	model.AddExp_step(expstep)
 	Res = []byte(ConvertByte2String(bytes, GB18030))
+
+	smp, err := model.GetSmpByName(req.Ressave)
+	if err != nil {
+		smp := new(model.Smp)
+		smp.Name = req.Ressave
+		smp.Address = req.Ressave
+		model.AddSmp(smp)
+	} else {
+		smp.Address = req.Ressave
+		model.UpdateSmp(smp)
+	}
+	fmt.Println(Res)
 	c.JSON(200, gin.H{"message": string(Res)})
 }

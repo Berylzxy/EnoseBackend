@@ -9,12 +9,14 @@ type Experiment struct {
 	ID         int `json:"id" gorm:"primary_key"`
 	Name       string
 	Enose_Name string
+	Classifier string
 	Sensor     string    `gorm:"type:text"`
 	Start_time time.Time `json:"start_time"`
 	End_time   time.Time `json:"end_time"`
 	State      string    `json:"state"`
 	Pump       string
 	Hertz      string
+	Address    string
 }
 
 func AddExperiment(experiment *Experiment) (err error) {
