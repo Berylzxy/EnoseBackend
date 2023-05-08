@@ -3,8 +3,11 @@ package router
 import (
 	"EnoseBackend/router/controller/enosecontroller"
 	"EnoseBackend/router/controller/experimentcontroller"
+	"EnoseBackend/router/controller/learningmodelcontroller"
+	"EnoseBackend/router/controller/settingcontroller"
 	"EnoseBackend/router/controller/smpcontroller"
 	"EnoseBackend/router/controller/usercontroller"
+	"EnoseBackend/service"
 	"EnoseBackend/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -19,10 +22,18 @@ func Init(r *gin.Engine) {
 		userGroup.GET("/info", usercontroller.UserInfo)
 		userGroup.GET("/list", usercontroller.ListUser)
 		userGroup.GET("/logout", usercontroller.UserSignOut)
+		userGroup.POST("/deal", usercontroller.DealUser)
+		userGroup.POST("/delete", usercontroller.DelUser)
 	}
 	deviceGroup := r.Group("/device")
 	{
+
 		deviceGroup.GET("/list", enosecontroller.ListEnose)
+		deviceGroup.POST("/listmodel", learningmodelcontroller.Listlearningmodel)
+		deviceGroup.POST("/update", enosecontroller.UpdateEnose)
+		deviceGroup.POST("/add", enosecontroller.AddEnose)
+
+		deviceGroup.POST("/delete", enosecontroller.DeleteEnose)
 	}
 	smpGroup := r.Group("/smp")
 
@@ -42,6 +53,11 @@ func Init(r *gin.Engine) {
 		expGroup.GET("/saveCsv", utils.SaveCsv)
 		expGroup.POST("/xlsxToJson", utils.XlsxToJson)
 		expGroup.POST("/FS", experimentcontroller.FS)
+		expGroup.POST("/Slice", experimentcontroller.SliceDataset)
+		expGroup.POST("/ExpFinish", experimentcontroller.Expfinish)
+		expGroup.POST("/Detail", experimentcontroller.ListExpDetail)
 	}
+	r.GET("/set", settingcontroller.Set)
+	r.GET("/ws", service.Ws)
 	return
 }

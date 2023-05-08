@@ -49,6 +49,7 @@ func ConvertByte2String(byte []byte, charset Charset) string {
 func Callpython(c *gin.Context) { //data是文件夹的名 文件夹下有很多文件夹 每个文件夹的名子对应标签
 	req := new(CallPythonRequest)
 	c.BindJSON(req)
+	fmt.Println(req)
 	python := new(model.Pythonfile)
 	expstep := new(model.Exp_step)
 	data := new(model.Smp)
@@ -61,7 +62,7 @@ func Callpython(c *gin.Context) { //data是文件夹的名 文件夹下有很多
 	if req.Dataname == "" {
 		c.JSON(200, gin.H{"message": "请选择文件"})
 	}
-	if req.Algorithm == "预测" {
+	if req.Algorithm == "预测" || req.Algorithm == "验证" {
 		//fmt.Println("进来了")
 		learningmodel := new(model.Learningmodel)
 		learningmodel, _ = model.GetLearningmodelByName(req.Kind, req.DeviceName, req.ExpName)

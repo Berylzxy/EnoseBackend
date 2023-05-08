@@ -8,10 +8,19 @@ import (
 type User struct {
 	gorm.Model
 	Identity string
+
 	Name     string
 	Password string
 }
 
+func ListUser() (user *[]User, err error) {
+	user = new([]User)
+	err = dao.DB.Find(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return
+}
 func AddUser(user *User) (err error) {
 	err = dao.DB.Create(user).Error
 	return

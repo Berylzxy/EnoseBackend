@@ -8,6 +8,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 type UserSignUpRequestBody struct {
@@ -86,6 +87,7 @@ func UserSignIn(c *gin.Context) {
 		return
 	}
 	fmt.Println("req", req)
+
 	user, err := model.GetUserByName(req.Username)
 
 	if err != nil {
@@ -94,11 +96,29 @@ func UserSignIn(c *gin.Context) {
 	}
 
 	if !utils.PasswordVerify(req.Password, user.Password) {
-		fmt.Println("??????????")
 		c.JSON(http.StatusOK, gin.H{"code": 1, "error": "用户名或密码错误"})
 		return
 	}
 
+	//token := jwt.New(jwt.SigningMethodHS256)
+	//claims := token.Claims.(jwt.MapClaims)
+	//claims["userId"] = user.ID
+	//claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+	//
+	//tokenString, err := token.SignedString([]byte("your-secret-key"))
+	//if err != nil {
+	//	c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "error": err.Error()})
+	//	return
+	//}
+	//
+	//resp := new(UserInfoResponseBody)
+	//resp.ID = user.ID
+	//resp.Username = user.Name
+	//
+	//// 将Token写入Cookie
+	//c.SetCookie("myCookie", tokenString, 3600, "/", "localhost", false, true)
+	//
+	//c.JSON(http.StatusOK, gin.H{"code": 0, "success": true, "data": resp})
 	session := sessions.Default(c)
 	session.Set("userId", user.ID)
 	err = session.Save()
@@ -106,11 +126,10 @@ func UserSignIn(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1, "error": err.Error()})
 		return
 	}
-
 	resp := new(UserInfoResponseBody)
 	resp.ID = user.ID
 	resp.Username = user.Name
-
+	//c.SetCookie("myCookie", "123456", 3600, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, gin.H{"code": 0, "success": true, "data": resp})
 }
 func UserSignOut(c *gin.Context) {
@@ -126,28 +145,61 @@ func UserSignOut(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"code": 0})
 }
 func UserInfo(c *gin.Context) {
-
 	session := sessions.Default(c)
-
 	userId := session.Get("userId")
-
-	if userId == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未登录"})
-		return
-	}
-
-	user, err := model.GetUserById(userId.(uint))
-
+	cookie, err := c.Request.Cookie("session") //这个b名卡我一周
+	fmt.Println(cookie)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未登录"})
-		return
+		// 未找到 cookie
+		// 处理未找到 cookie 的情况
+		c.JSON(401, gin.H{"data": "unauthorized"})
+	} else {
+		// 找到 cookie
+		// 使用 cookie.Value 来访问 cookie 值
+		value := cookie.Value
+		// 处理找到 cookie 的情况
+		fmt.Println(value)
+		if userId == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未登录"})
+			return
+		}
+
+		user, err := model.GetUserById(userId.(uint))
+
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未登录"})
+			return
+		}
+
+		resp := new(UserInfoResponseBody)
+		resp.ID = user.ID
+		resp.Username = user.Name
+
+		c.JSON(http.StatusOK, gin.H{"data": resp})
 	}
 
-	resp := new(UserInfoResponseBody)
-	resp.ID = user.ID
-	resp.Username = user.Name
+}
 
-	c.JSON(http.StatusOK, gin.H{"data": resp})
+type ListRes struct {
+	key      string
+	username string
+	identity string
+	lasttime string
+}
+
+func Listuser(c *gin.Context) {
+	User, _ := model.ListUser()
+	res := []ListRes{}
+	for i, val := range *User {
+		tmp := ListRes{}
+		tmp.key = strconv.Itoa(int(val.ID))
+		tmp.username = val.Name
+		tmp.identity = val.Identity
+		res = append(res, tmp)
+		fmt.Println(i, res)
+	}
+	c.ShouldBind(res)
+	c.JSON(200, res)
 }
 
 //func UserForget(c *gin.Context) {

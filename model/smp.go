@@ -3,10 +3,13 @@ package model
 import "EnoseBackend/dao"
 
 type Smp struct {
-	ID          int    `json:"id" gorm:"primary_key"`
-	Name        string `json:"name"`
-	Label       string `json:"label"`
-	Address     string `json:"address"`
+	ID      int    `json:"id" gorm:"primary_key"`
+	Name    string `json:"name"`
+	Label   string `json:"label"`
+	Address string `json:"address"`
+	Pump    string
+	Hertz   string
+
 	Duration    string
 	Size        string
 	Composition string

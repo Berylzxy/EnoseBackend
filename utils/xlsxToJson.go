@@ -27,11 +27,11 @@ func XlsxToJson(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 1, "error": err.Error()})
 		return
 	}
-	fmt.Println("req", req)
-	fmt.Println("req", req.DocAddr)
+
+	//fmt.Println("req", req.DocAddr)
 
 	//解析Xlsx 注：源文件内只有一张表Sheet1----------------------------------------------------------------
-	fmt.Println("\n\n\n\n", req.DocAddr)
+	//fmt.Println("\n\n\n\n", req.DocAddr)
 	xlsx, err := excelize.OpenFile(req.DocAddr)
 	//xlsx, err := excelize.OpenFile("D:\\桌面\\电子鼻\\data\\钙果（七成）\\1.xlsx")
 	if err != nil {
@@ -50,19 +50,25 @@ func XlsxToJson(c *gin.Context) {
 	}*/
 
 	colNum := len(rows[0])
-	fmt.Println("colNum:", colNum)
+	//fmt.Println("colNum:", colNum)
 
 	dataList := make([]rowdata, 0, len(rows))
+
+	i := 0
 	for _, row := range rows {
+
 		data := make(rowdata, colNum)
 		for k := 0; k < colNum; k++ {
 			if k < len(row) {
 				data[k] = row[k]
 			}
 		}
-		dataList = append(dataList, data)
-	}
 
+		dataList = append(dataList, data)
+		i++
+
+	}
+	//fmt.Println(dataList)
 	metaList := make([]meta, 12, colNum)
 	metaList[0].id = "传感器1"
 	metaList[1].id = "传感器2"
@@ -186,5 +192,5 @@ func XlsxToJson(c *gin.Context) {
 		Success: true,
 	}
 	c.JSON(http.StatusOK, resp)
-	fmt.Println(resp)
+	//fmt.Println(resp)
 }

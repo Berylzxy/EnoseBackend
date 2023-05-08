@@ -2,15 +2,32 @@ package model
 
 import (
 	"EnoseBackend/dao"
+	"database/sql/driver"
 	"gorm.io/gorm"
+	"strings"
 )
+
+type Tag []string
 
 type Learningmodel struct {
 	gorm.Model
 	Name            string `json:"name"`
 	Experiment_name string
 	Enose_name      string
+	FE              string `json:"FeatureExtraction"`
+	FS              Tag    `json:"FeatureSelected" gorm:"text"`
 	Address         string `json:"address"`
+}
+
+func (m *Tag) Scan(val interface{}) error {
+	s := val.([]uint8)
+	ss := strings.Split(string(s), ",")
+	*m = ss
+	return nil
+}
+func (m Tag) Value() (driver.Value, error) {
+	str := strings.Join(m, ",")
+	return str, nil
 }
 
 func AddLearningmodel(learningmodel *Learningmodel) (err error) {
@@ -23,9 +40,9 @@ func UpdateLearningmodel(learningmodel *Learningmodel) (err error) {
 	return
 }
 
-func GetLearningmodelByEnose(Enosename string) (learningmodel *[]Learningmodel, err error) {
+func GetLearningmodelByExpName(ExpName string) (learningmodel *[]Learningmodel, err error) {
 	learningmodel = new([]Learningmodel)
-	err = dao.DB.Debug().Where("enose_name=?", Enosename).Find(learningmodel).Error
+	err = dao.DB.Debug().Where("experiment_name=?", ExpName).Find(learningmodel).Error
 	if err != nil {
 		return nil, err
 	}

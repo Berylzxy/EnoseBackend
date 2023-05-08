@@ -11,11 +11,9 @@ type Experiment struct {
 	Enose_Name string
 	Classifier string
 	Sensor     string    `gorm:"type:text"`
+	State      string    `json:"state"`
 	Start_time time.Time `json:"start_time"`
 	End_time   time.Time `json:"end_time"`
-	State      string    `json:"state"`
-	Pump       string
-	Hertz      string
 	Address    string
 }
 
