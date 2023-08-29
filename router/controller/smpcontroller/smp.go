@@ -13,6 +13,9 @@ import (
 	"strings"
 )
 
+type Del struct {
+	Id int
+}
 type SelectSmpRequestBody struct {
 	Name    string
 	Label   string
@@ -37,6 +40,19 @@ func ListSmp(c *gin.Context) {
 	} else {
 		c.JSON(200, smp)
 	}
+}
+func DelSmp(c *gin.Context) {
+	req := new(Del)
+	c.BindJSON(req)
+	smp, _ := model.GetSmpById(req.Id)
+	model.DeleteSmp(smp)
+	c.JSON(200, gin.H{"code": "0", "success": "1", "message": "success"})
+}
+func Detail(c *gin.Context) {
+	req := new(Del)
+	c.BindJSON(req)
+	smp, _ := model.GetSmpById(req.Id)
+	c.JSON(200, smp)
 }
 func SelectSmp(c *gin.Context) {
 	req := new(SelectSmpRequestBody)

@@ -8,6 +8,7 @@ import (
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"io/ioutil"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -19,6 +20,71 @@ const (
 )
 
 var Res []byte
+
+/* 这里将算法参数放进一个数组中  参数变为 py名 参数数组（大模型的各项参数）输入数据地址 输出数据地址
+ */
+type CallnewPythonRequest struct {
+	ExpName    string
+	DeviceName string
+	Pyname     string
+	Args       []string
+	Data       string
+	Res        string
+}
+
+func Callnewpython(c *gin.Context) { //data是文件夹的名 文件夹下有很多文件夹 每个文件夹的名子对应标签
+	req := new(CallnewPythonRequest)
+	c.BindJSON(req)
+	fmt.Println(req)
+	python := new(model.Pythonfile)
+
+	python, _ = model.GetPythonfileByName(req.Pyname)
+	args := req.Args
+	for i := range args {
+		args[i] = strings.TrimSpace(args[i])
+	}
+	a := append([]string{python.Address}, args...)
+	smp, _ := model.GetSmpByName(req.Data)
+	
+	a = append(a, smp.Address, req.Res)
+	fmt.Println(a)
+	//cmd := exec.Command("python", "D:\\桌面\\电子鼻\\pythonfile\\Predict.py", "D:\\桌面\\实验路径\\next\\训练-gaussnb.model", "D:\\桌面\\预测路径\\predict.xlsx", "D:\\桌面\\预测路径\\test-next-gaussnb-predict.xlsx")
+	cmd := exec.Command("python", a...)
+
+	//创建获取命令输出管道
+	fmt.Println(cmd)
+	stdout, err := cmd.StdoutPipe()
+
+	if err != nil {
+		fmt.Printf("Error:can not obtain stdout pipe for command:%s\n", err)
+		return
+	}
+
+	//执行命令
+	if err := cmd.Start(); err != nil {
+		fmt.Println("Error:The command is err,", err)
+		return
+	}
+
+	//读取所有输出
+	bytes, err := ioutil.ReadAll(stdout)
+
+	if err != nil {
+		fmt.Println("ReadAll Stdout:", err.Error())
+		return
+	}
+
+	if err := cmd.Wait(); err != nil {
+		fmt.Println("wait:", err.Error())
+		return
+	}
+	fmt.Printf("stdout:\n\n %s", bytes)
+
+	Res = []byte(ConvertByte2String(bytes, GB18030))
+	fmt.Println(Res)
+
+	c.JSON(200, gin.H{"message": string(Res)})
+}
 
 type CallPythonRequest struct {
 	ExpName    string

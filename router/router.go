@@ -4,6 +4,7 @@ import (
 	"EnoseBackend/router/controller/enosecontroller"
 	"EnoseBackend/router/controller/experimentcontroller"
 	"EnoseBackend/router/controller/learningmodelcontroller"
+	"EnoseBackend/router/controller/pythoncontroller"
 	"EnoseBackend/router/controller/settingcontroller"
 	"EnoseBackend/router/controller/smpcontroller"
 	"EnoseBackend/router/controller/usercontroller"
@@ -24,6 +25,7 @@ func Init(r *gin.Engine) {
 		userGroup.GET("/logout", usercontroller.UserSignOut)
 		userGroup.POST("/deal", usercontroller.DealUser)
 		userGroup.POST("/delete", usercontroller.DelUser)
+		userGroup.POST("/modifyPwd", usercontroller.ModifyPwd)
 	}
 	deviceGroup := r.Group("/device")
 	{
@@ -32,15 +34,27 @@ func Init(r *gin.Engine) {
 		deviceGroup.POST("/listmodel", learningmodelcontroller.Listlearningmodel)
 		deviceGroup.POST("/update", enosecontroller.UpdateEnose)
 		deviceGroup.POST("/add", enosecontroller.AddEnose)
-
+		deviceGroup.POST("/addSensor", enosecontroller.AddSensor)
+		deviceGroup.POST("/delSensor", enosecontroller.DelSensor)
+		deviceGroup.POST("/listSensor", enosecontroller.ListSensorByEnoseName)
+		deviceGroup.POST("/addClassifier", enosecontroller.AddClassifier)
+		deviceGroup.POST("/delClassifier", enosecontroller.DelClassifier)
+		deviceGroup.POST("/listClassifier", enosecontroller.ListClassifierByEnoseName)
 		deviceGroup.POST("/delete", enosecontroller.DeleteEnose)
 	}
 	smpGroup := r.Group("/smp")
 
 	{
 		smpGroup.GET("/list", smpcontroller.ListSmp)
+		smpGroup.POST("/del", smpcontroller.DelSmp)
+		smpGroup.POST("/detail", smpcontroller.Detail)
 		smpGroup.GET("/select", smpcontroller.SelectSmp)
 
+	}
+	pythonGroup := r.Group("/python")
+	{
+		pythonGroup.GET("/list", pythoncontroller.ListPy)
+		pythonGroup.POST("/del", pythoncontroller.Delpy)
 	}
 	expGroup := r.Group("/exp")
 	{
@@ -48,6 +62,7 @@ func Init(r *gin.Engine) {
 		expGroup.POST("/expdel", experimentcontroller.ExpDel)
 		expGroup.POST("/start", experimentcontroller.StartExp)
 		expGroup.POST("/call", experimentcontroller.Callpython)
+		expGroup.POST("/callnew", experimentcontroller.Callnewpython)
 		expGroup.POST("/datacollect", experimentcontroller.DataCollect)
 		expGroup.POST("/setexp", experimentcontroller.SetExp)
 		expGroup.GET("/saveCsv", utils.SaveCsv)
@@ -57,6 +72,7 @@ func Init(r *gin.Engine) {
 		expGroup.POST("/ExpFinish", experimentcontroller.Expfinish)
 		expGroup.POST("/Detail", experimentcontroller.ListExpDetail)
 	}
+	r.POST("/test", experimentcontroller.Callnewpython)
 	r.GET("/set", settingcontroller.Set)
 	r.GET("/ws", service.Ws)
 	return

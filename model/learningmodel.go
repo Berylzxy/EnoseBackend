@@ -11,12 +11,12 @@ type Tag []string
 
 type Learningmodel struct {
 	gorm.Model
-	Name            string `json:"name"`
+	Name            string `json:"Name"`
 	Experiment_name string
 	Enose_name      string
 	FE              string `json:"FeatureExtraction"`
 	FS              Tag    `json:"FeatureSelected" gorm:"text"`
-	Address         string `json:"address"`
+	Address         string `json:"Address"`
 }
 
 func (m *Tag) Scan(val interface{}) error {

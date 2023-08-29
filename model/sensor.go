@@ -26,9 +26,9 @@ func GetSensorById(id uint) (sensor *Sensor, err error) {
 	}
 	return
 }
-func GetSensorBySensorName(name string) (sensor *Sensor, err error) {
+func GetSensorBySensorName(name string, enosename string) (sensor *Sensor, err error) {
 	sensor = new(Sensor)
-	err = dao.DB.Debug().Where("sensor_name=?", name).First(sensor).Error
+	err = dao.DB.Debug().Where("sensor_name=? AND enose_name=?", name, enosename).First(sensor).Error
 	if err != nil {
 		return nil, err
 	}

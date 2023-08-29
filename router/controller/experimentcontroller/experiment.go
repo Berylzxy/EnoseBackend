@@ -133,6 +133,7 @@ func StartExp(c *gin.Context) {
 		exp.State = "start"
 		exp.Start_time = time.Now()
 
+		exp.Address = req.Address
 		device, err := model.GetEnoseByName(req.Enose_Name)
 		if err != nil {
 			c.JSON(200, gin.H{"success": false, "message": "未找到设备"})
@@ -148,6 +149,7 @@ func StartExp(c *gin.Context) {
 		expstep.Name = req.Name
 		expstep.Step = "setting"
 		expstep.Start_Time = time.Now()
+
 		model.AddExperiment(exp)
 		model.AddExp_step(expstep)
 		model.AddExperiment(exp)
@@ -236,6 +238,7 @@ func ListExpDetail(c *gin.Context) { //接收实验名 返回状态 数据地址
 	}
 	req := new(GetDetails)
 	c.BindJSON(req)
+	fmt.Println(req)
 	Exp, _ := model.GetExp_stepByName(req.Name)
 	res := new(Detail)
 	res.DataAddress = Exp.Data_Address

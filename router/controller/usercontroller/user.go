@@ -202,6 +202,39 @@ func Listuser(c *gin.Context) {
 	c.JSON(200, res)
 }
 
+type UserModifyPwd struct {
+	Username    string
+	Password    string
+	Newpassword string
+}
+
+func ModifyPwd(c *gin.Context) {
+	req := new(UserModifyPwd)
+	err := c.ShouldBind(&req)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1, "error": err.Error()})
+		return
+	}
+	fmt.Println("req", req)
+	user, err := model.GetUserByName(req.Username)
+
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 1, "error": err.Error()})
+		return
+	}
+
+	if !utils.PasswordVerify(req.Password, user.Password) {
+		fmt.Println("??????????")
+		c.JSON(http.StatusOK, gin.H{"code": 1, "success": false, "message": "密码错误"})
+		return
+	}
+
+	user.Password = utils.PasswordEncrypt(req.Newpassword)
+	model.UpdateUser(user)
+	c.JSON(http.StatusOK, gin.H{"code": 0, "success": true, "message": "修改成功"})
+}
+
 //func UserForget(c *gin.Context) {
 //	req := new(UserForgetRequestBody)
 //	err := c.BindJSON(&req)

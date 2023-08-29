@@ -25,7 +25,7 @@ func UpdateSmp(smp *Smp) (err error) {
 	return
 }
 
-func GetSmpById(id uint) (smp *Smp, err error) {
+func GetSmpById(id int) (smp *Smp, err error) {
 	smp = new(Smp)
 	err = dao.DB.Debug().Where("id=?", id).First(smp).Error
 	if err != nil {

@@ -18,7 +18,7 @@ func UpdatePythonfile(pythonfile *Pythonfile) (err error) {
 	return
 }
 
-func GetPythonfileById(id uint) (pythonfile *Pythonfile, err error) {
+func GetPythonfileById(id int) (pythonfile *Pythonfile, err error) {
 	pythonfile = new(Pythonfile)
 	err = dao.DB.Debug().Where("id=?", id).First(pythonfile).Error
 	if err != nil {
